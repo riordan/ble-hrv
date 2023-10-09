@@ -1,61 +1,98 @@
-<script>
-	import {
-		connectToHeartRateDevice,
-		parseHeartRate,
-		getBatteryLevel,
-		getDeviceInfo,
-	} from "./bleHelper.js";
-	import {
-		calculateSDNN,
-		calculateRMSSD,
-		calculateNN50,
-		calculatepNN50,
-		calculateAverageHR,
-		calculateFrequencyDomainMetrics,
-	} from "./hrvMetrics.js";
+<script lang="ts">
+    import {
+        connectToHeartRateDevice,
+        parseHeartRate,
+        getBatteryLevel,
+        getDeviceInfo,
+    } from "./bleHelper.js";
+	
+    import {
+        calculateSDNN,
+        calculateRMSSD,
+        calculateNN50,
+        calculatepNN50,
+        calculateAverageHR,
+        calculateFrequencyDomainMetrics,
+    } from "./hrvMetrics.js";
 
-	let heartRateResult = null;
-	let batteryLevel;
-	let deviceInfo;
-	let sdnn, rmssd, nn50, pnn50, averageHR;
-	let frequencyMetrics;
+    type HeartRateData = {
+        timestamp: number;
+        heartRate: number;
+        contactDetected: boolean;
+        energyExpended?: number;
+        rrIntervals?: number[];
+    };
 
-	async function connect() {
-		try {
-			const { characteristic, device } = await connectToHeartRateDevice();
+    type FrequencyMetrics = {
+        totalPower: number;
+        vlf: number;
+        lf: number;
+        hf: number;
+        lf_hf_ratio: number;
+    };
 
-			batteryLevel = await getBatteryLevel(device);
-			deviceInfo = getDeviceInfo(device);
+    type DeviceInfo = {
+        name: string; 
+        id: string;
+    };
 
-			characteristic.startNotifications();
-			characteristic.addEventListener(
-				"characteristicvaluechanged",
-				handleHeartRateChange
-			);
-		} catch (error) {
-			console.error(error);
-			// Display the error to the user
-		}
-	}
+    let heartRateResult: HeartRateData | null = null;
+    let batteryLevel: number | null = null;
+    let deviceInfo: DeviceInfo | null = null;
+    let sdnn: number | null = null;
+    let rmssd: number | null = null;
+    let nn50: number | null = null;
+    let pnn50: number | null = null;
+    let averageHR: number | null = null;
+    let frequencyMetrics: FrequencyMetrics | null = null;
 
-	function handleHeartRateChange(event) {
-		heartRateResult = parseHeartRate(event.target.value);
+    async function connect() {
+        try {
+            const { characteristic, device } = await connectToHeartRateDevice();
 
-		if (
-			heartRateResult.rrIntervals &&
-			heartRateResult.rrIntervals.length > 1
-		) {
-			sdnn = calculateSDNN(heartRateResult.rrIntervals);
-			rmssd = calculateRMSSD(heartRateResult.rrIntervals);
-			nn50 = calculateNN50(heartRateResult.rrIntervals);
-			pnn50 = calculatepNN50(heartRateResult.rrIntervals);
-			averageHR = calculateAverageHR(heartRateResult.rrIntervals);
+            batteryLevel = await getBatteryLevel(device);
+            
+            // Fix name property to be required string
+            deviceInfo = {
+                name: device.name!,
+                id: device.id
+            };
 
-			frequencyMetrics = calculateFrequencyDomainMetrics(
-				heartRateResult.rrIntervals
-			);
-		}
-	}
+            characteristic.startNotifications();
+            characteristic.addEventListener(
+                "characteristicvaluechanged",
+                handleHeartRateChange
+            );
+        } catch (error) {
+            console.error(error);
+            // Display the error to the user
+        }
+    }
+
+    function handleHeartRateChange(event: Event) {
+        // Type assertion for the event target
+        const target = event.target as BluetoothRemoteGATTCharacteristic;
+        
+        // Add check for undefined value
+        if (target.value) {
+          heartRateResult = parseHeartRate(target.value);
+        }
+
+        if (
+            heartRateResult?.rrIntervals &&
+            heartRateResult.rrIntervals.length > 1
+        ) {
+            sdnn = calculateSDNN(heartRateResult.rrIntervals);
+            rmssd = calculateRMSSD(heartRateResult.rrIntervals);
+            nn50 = calculateNN50(heartRateResult.rrIntervals);
+            pnn50 = calculatepNN50(heartRateResult.rrIntervals);
+            averageHR = calculateAverageHR(heartRateResult.rrIntervals);
+
+            frequencyMetrics = calculateFrequencyDomainMetrics(
+                heartRateResult.rrIntervals
+            );
+        }
+    }
 </script>
 
 <button on:click={connect}>Connect to Heart Rate Monitor</button>
@@ -65,7 +102,9 @@
 		<p>Timestamp: {heartRateResult.timestamp}</p>
 		<p>Heart Rate: {heartRateResult.heartRate} bpm</p>
 		<p>Battery Level: {batteryLevel}%</p>
-		<p>Device Name: {deviceInfo.name}</p>
+		{#if deviceInfo}
+			<p>Device Name: {deviceInfo.name}</p>
+		{/if}
 
 		<h3>HRV Metrics (Time Domain)</h3>
 		<p>SDNN: {sdnn}</p>
