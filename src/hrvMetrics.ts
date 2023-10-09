@@ -1,10 +1,16 @@
-import FFT from 'fft-js';
+import webfft from "webfft";
+
+
+// Constants for frequency bands
+const VLF_BAND = [0.0033, 0.04];
+const LF_BAND = [0.04, 0.15];
+const HF_BAND = [0.15, 0.4];
 
 
 // Time domain metrics
 
 // SDNN: Standard Deviation of NN intervals
-export function calculateSDNN(rrIntervals) {
+export function calculateSDNN(rrIntervals: number[]) {
     const mean = rrIntervals.reduce((acc, val) => acc + val, 0) / rrIntervals.length;
     const squaredDiffs = rrIntervals.map(val => Math.pow(val - mean, 2));
     const variance = squaredDiffs.reduce((acc, val) => acc + val, 0) / rrIntervals.length;
@@ -12,7 +18,7 @@ export function calculateSDNN(rrIntervals) {
 }
 
 // RMSSD: Root Mean Square of Successive Differences
-export function calculateRMSSD(rrIntervals) {
+export function calculateRMSSD(rrIntervals: number[]) {
     const squaredDiffs = [];
     for (let i = 1; i < rrIntervals.length; i++) {
         const diff = rrIntervals[i] - rrIntervals[i - 1];
@@ -22,7 +28,7 @@ export function calculateRMSSD(rrIntervals) {
 }
 
 // NN50 and pNN50
-export function calculateNN50(rrIntervals) {
+export function calculateNN50(rrIntervals: number[]) {
     let count = 0;
     for (let i = 1; i < rrIntervals.length; i++) {
         if (Math.abs(rrIntervals[i] - rrIntervals[i - 1]) > 50) count++;
@@ -30,50 +36,51 @@ export function calculateNN50(rrIntervals) {
     return count;
 }
 
-export function calculatepNN50(rrIntervals) {
+export function calculatepNN50(rrIntervals: number[]) {
     const nn50 = calculateNN50(rrIntervals);
     return (nn50 / rrIntervals.length) * 100;
 }
 
 // Average Heart Rate
-export function calculateAverageHR(rrIntervals) {
+export function calculateAverageHR(rrIntervals: number[]) {
     const totalTime = rrIntervals.reduce((acc, val) => acc + val, 0);
     return (60000 / (totalTime / rrIntervals.length));
 }
 
-// Frequency domain metrics
+//Calculate Frequency Domain metrics
 
-// Helper to compute power spectral density
-function powerSpectralDensity(fftOutput) {
-    return fftOutput.map(value => (value[0] ** 2 + value[1] ** 2));
-}
+export function calculateFrequencyDomainMetrics(rrIntervals: number[]): any {
+    const n = rrIntervals.length;
+    const sampleRate = 1 / (rrIntervals.reduce((a, b) => a + b, 0) / n / 1000);  // in Hz
 
-// Calculate frequency domain metrics
-export function calculateFrequencyDomainMetrics(rrIntervals) {
-    const fftOutput = FFT.fft(FFT.util.fftResult(rrIntervals));
-    const psd = powerSpectralDensity(fftOutput);
+    // Create FFT object
+    const fft = new webfft(n);
 
-    let totalPower = 0;
-    let vlf = 0;
-    let lf = 0;
-    let hf = 0;
+    // Convert RR intervals to time series
+    const timeSeriesArray = Array.from({ length: n }, (_, i) => {
+        return (60000 / rrIntervals[i]) - (60000 / (rrIntervals.reduce((a, b) => a + b, 0) / n));
+    });
 
-    // Assuming a sampling rate of one value per second (this might need adjustment)
-    const freqResolution = 1 / rrIntervals.length;
+    const timeSeries = new Float32Array(timeSeriesArray);
 
-    for (let i = 0; i < psd.length; i++) {
-        const freq = freqResolution * i;
 
-        totalPower += psd[i];
-
-        if (freq >= 0.0033 && freq < 0.04) {
-            vlf += psd[i];
-        } else if (freq >= 0.04 && freq < 0.15) {
-            lf += psd[i];
-        } else if (freq >= 0.15 && freq < 0.4) {
-            hf += psd[i];
-        }
+    // Compute the power spectral density (PSD)
+    const spectrum = fft.fft(timeSeries);
+    const psd = [];
+    for (let i = 0; i < spectrum.length; i += 2) {
+        const real = spectrum[i];
+        const imag = spectrum[i + 1];
+        psd.push((real * real + imag * imag) / n);
     }
+
+    // Calculate power in each frequency band
+    const totalPower = integratePSD(psd, sampleRate, VLF_BAND[0], HF_BAND[1]);
+    const vlf = integratePSD(psd, sampleRate, VLF_BAND[0], VLF_BAND[1]);
+    const lf = integratePSD(psd, sampleRate, LF_BAND[0], LF_BAND[1]);
+    const hf = integratePSD(psd, sampleRate, HF_BAND[0], HF_BAND[1]);
+
+    // Clean up
+    fft.dispose();
 
     return {
         totalPower,
@@ -82,4 +89,17 @@ export function calculateFrequencyDomainMetrics(rrIntervals) {
         hf,
         lf_hf_ratio: lf / hf
     };
+}
+
+
+function integratePSD(psd: number[], sampleRate: number, fStart: number, fEnd: number): number {
+    const df = sampleRate / psd.length;  // frequency resolution
+    const startIndex = Math.round(fStart / df);
+    const endIndex = Math.round(fEnd / df);
+
+    let sum = 0;
+    for (let i = startIndex; i <= endIndex; i++) {
+        sum += psd[i];
+    }
+    return sum * df;
 }

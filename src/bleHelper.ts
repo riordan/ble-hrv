@@ -9,17 +9,22 @@ export async function connectToHeartRateDevice() {
             optionalServices: ['battery_service']
         });
 
-        const server = await device.gatt.connect();
-        const service = await server.getPrimaryService('heart_rate');
-        const characteristic = await service.getCharacteristic('heart_rate_measurement');
+        if (device.gatt) {
+            const server = await device.gatt.connect();
+            const service = await server.getPrimaryService('heart_rate');
+            const characteristic = await service.getCharacteristic('heart_rate_measurement');
 
-        return { characteristic, device };
-    } catch (error) {
+            return { characteristic, device };
+        } else {
+            throw new Error("Device GATT is undefined");
+        }
+
+    } catch (error: any) {
         console.error("Bluetooth Error:", error);
         throw new Error("Failed to connect to device: " + error.message);
     }
 }
-export function parseHeartRate(value) {
+export function parseHeartRate(value: DataView) {
     // This logic is based on the Bluetooth SIG Heart Rate Profile specification
 
     // Flags
@@ -56,7 +61,11 @@ export function parseHeartRate(value) {
         rrIntervals: rrIntervals.length > 0 ? rrIntervals : undefined
     };
 }
-export async function getBatteryLevel(device) {
+export async function getBatteryLevel(device: BluetoothDevice) {
+    if (!device.gatt) {
+        throw new Error("'device.gatt' is undefined");
+    }
+    
     try {
         const server = await device.gatt.connect();
         const batteryService = await server.getPrimaryService('battery_service');
@@ -64,26 +73,25 @@ export async function getBatteryLevel(device) {
         const batteryLevel = await batteryLevelChar.readValue();
 
         return batteryLevel.getUint8(0);  // returns battery percentage
-    } catch (error) {
+    } catch (error: any) {
         console.error("Battery Level Error:", error);
         return null;
     }
 }
 
-export function stopHeartRateNotifications(characteristic) {
+export function stopHeartRateNotifications(characteristic: BluetoothRemoteGATTCharacteristic, callback: (event: Event) => void) {
     try {
         characteristic.stopNotifications();
-        characteristic.removeEventListener('characteristicvaluechanged', handleHeartRateChange);
+        characteristic.removeEventListener('characteristicvaluechanged', callback);
     } catch (error) {
         console.error("Stop Notifications Error:", error);
     }
 }
 
-export function getDeviceInfo(device) {
+
+export function getDeviceInfo(device: BluetoothDevice) {
     return {
         name: device.name,
-        id: device.id,
-        paired: device.paired,
-        uuids: device.uuids
+        id: device.id
     };
 }
