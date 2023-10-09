@@ -46,11 +46,27 @@ export function calculateAverageHR(rrIntervals: number[]) {
     const totalTime = rrIntervals.reduce((acc, val) => acc + val, 0);
     return (60000 / (totalTime / rrIntervals.length));
 }
+function isPowerOfTwo(n: number): boolean {
+    return !!n && (n & (n - 1)) === 0;
+}
+
 
 //Calculate Frequency Domain metrics
 
 export function calculateFrequencyDomainMetrics(rrIntervals: number[]): any {
     const n = rrIntervals.length;
+    
+    // Log the size of rrIntervals for diagnostics.
+    console.log(`Processing rrIntervals of size: ${n}`);
+
+    // Ensure that the size is a power of 2 and within the allowed range.
+    if (!isPowerOfTwo(n)) {
+        console.error(`Invalid size: ${n}. Size is not a power of 2.`);
+    }
+    if (n < 4 || n > 131072) {
+        console.error(`Invalid size: ${n}. Size is out of the allowed range (4 to 131072).`);
+    }
+
     const sampleRate = 1 / (rrIntervals.reduce((a, b) => a + b, 0) / n / 1000);  // in Hz
 
     // Create FFT object
