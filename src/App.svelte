@@ -86,7 +86,8 @@
             console.log(`NN50: ${nn50}, pNN50: ${pnn50}`); // Log NN50 and pNN50 values
             averageHR = calculateAverageHR(heartRateResult.rrIntervals);
 
-            frequencyMetrics = calculateFrequencyDomainMetrics(heartRateResult.rrIntervals);
+            // Temporarily disabled frequency domain metrics calculation
+            // frequencyMetrics = calculateFrequencyDomainMetrics(heartRateResult.rrIntervals);
         }
     }
 </script>

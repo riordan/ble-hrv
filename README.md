@@ -8,6 +8,12 @@ Using the Bluetooth WebAPI to get heart rate variability data from a chest strap
 ## Getting started
 So much wet paint. Instructions tk. Testing with a Polar H9 chest strap. Should hopefully work with others.
 
+## Frequency Domain Metrics Calculation Approach
+
+To calculate frequency domain metrics, our approach will be to:
+1. Calculate them in real-time via a sliding window.
+2. Introduce the concept of a logged session and be able to fully compute the frequency domain metrics for a whole session or across windows of that session.
+
 ## Prior Art
 This project couldn't have been done without the work of those who came before:
 - [Elite HRV](https://elitehrv.com/) - One of the best HRV tracking tools, who for years have been evangelizing the practice of HRV biofeedback. They've been superheroes in making HRV accessible and actionable.
