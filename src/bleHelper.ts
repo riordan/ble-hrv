@@ -79,7 +79,14 @@ export async function getBatteryLevel(device: BluetoothDevice) {
     }
 }
 
-export function stopHeartRateNotifications(characteristic: BluetoothRemoteGATTCharacteristic, callback: (event: Event) => void) {
+export async function disconnectFromHeartRateDevice(device: BluetoothDevice) {
+    if (device.gatt?.connected) {
+        await device.gatt.disconnect();
+        console.log("Device disconnected");
+    }
+}
+
+export function stopHeartRateNotifications(characteristic: BluetoothRemoteGATTCharacteristic) {
     try {
         characteristic.stopNotifications();
         characteristic.removeEventListener('characteristicvaluechanged', callback);

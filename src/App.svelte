@@ -41,6 +41,8 @@
         id: string;
     };
 
+    let sessionActive = false;
+    let sessionData: HeartRateData[] = [];
     let heartRateResult: HeartRateData | null = null;
     let batteryLevel: number | null = null;
     let deviceInfo: DeviceInfo | null = null;
@@ -51,7 +53,21 @@
     let averageHR: number | null = null;
     let frequencyMetrics: FrequencyMetrics | null = null;
 
+    async function disconnect() {
+        if (heartRateResult?.characteristic && deviceInfo?.device) {
+            stopHeartRateNotifications(heartRateResult.characteristic);
+            await disconnectFromHeartRateDevice(deviceInfo.device);
+            heartRateResult = null;
+            deviceInfo = null;
+            batteryLevel = null;
+        }
+    }
+
     async function connect() {
+        if (sessionActive) {
+            console.error("Cannot connect during an active session.");
+            return;
+        }
         try {
             const { characteristic, device } = await connectToHeartRateDevice();
 
@@ -74,7 +90,20 @@
         }
     }
 
+    function startSession() {
+        sessionActive = true;
+        sessionData = [];
+    }
+
+    function endSession() {
+        sessionActive = false;
+        // Here you would calculate the metrics for the whole session
+        // calculateTimeDomainMetrics(sessionData);
+        // calculateFrequencyDomainMetrics(sessionData); // Once implemented
+    }
+
     function handleHeartRateChange(event: Event) {
+        if (!sessionActive) return;
         // Type assertion for the event target
         const target = event.target as BluetoothRemoteGATTCharacteristic;
         
@@ -103,7 +132,13 @@
     <p>WebBluetooth is not enabled in your browser. Please enable it to use this application.</p>
 {/if}
 
-{#if heartRateResult}
+{#if deviceInfo}
+    <button on:click={startSession} disabled={sessionActive}>Start Session</button>
+    <button on:click={endSession} disabled={!sessionActive}>End Session</button>
+    <button on:click={disconnect}>Disconnect HRM</button>
+{/if}
+
+{#if heartRateResult && sessionActive}
 	<div>
 		<p>Timestamp: {heartRateResult.timestamp}</p>
 		<p>Heart Rate: {heartRateResult.heartRate} bpm</p>
