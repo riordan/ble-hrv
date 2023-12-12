@@ -78,19 +78,15 @@
           heartRateResult = parseHeartRate(target.value);
         }
 
-        if (
-            heartRateResult?.rrIntervals &&
-            heartRateResult.rrIntervals.length > 1
-        ) {
+        if (heartRateResult?.rrIntervals && heartRateResult.rrIntervals.length > 1) {
             sdnn = calculateSDNN(heartRateResult.rrIntervals);
             rmssd = calculateRMSSD(heartRateResult.rrIntervals);
             nn50 = calculateNN50(heartRateResult.rrIntervals);
             pnn50 = calculatepNN50(heartRateResult.rrIntervals);
+            console.log(`NN50: ${nn50}, pNN50: ${pnn50}`); // Log NN50 and pNN50 values
             averageHR = calculateAverageHR(heartRateResult.rrIntervals);
 
-            frequencyMetrics = calculateFrequencyDomainMetrics(
-                heartRateResult.rrIntervals
-            );
+            frequencyMetrics = calculateFrequencyDomainMetrics(heartRateResult.rrIntervals);
         }
     }
 </script>
