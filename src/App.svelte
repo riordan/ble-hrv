@@ -5,6 +5,11 @@
         getBatteryLevel,
         getDeviceInfo,
     } from "./bleHelper.js";
+
+    let isWebBluetoothAvailable = false;
+
+    // Reactive statement to check for WebBluetooth support
+    $: isWebBluetoothAvailable = 'bluetooth' in navigator && navigator.bluetooth != null;
 	
     import {
         calculateSDNN,
@@ -92,7 +97,11 @@
     }
 </script>
 
-<button on:click={connect}>Connect to Heart Rate Monitor</button>
+{#if isWebBluetoothAvailable}
+    <button on:click={connect}>Connect to Heart Rate Monitor</button>
+{:else}
+    <p>WebBluetooth is not enabled in your browser. Please enable it to use this application.</p>
+{/if}
 
 {#if heartRateResult}
 	<div>
