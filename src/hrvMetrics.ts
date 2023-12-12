@@ -1,11 +1,9 @@
 import webfft from "webfft";
 
-
 // Constants for frequency bands
 const VLF_BAND = [0.0033, 0.04];
 const LF_BAND = [0.04, 0.15];
 const HF_BAND = [0.15, 0.4];
-
 
 // Time domain metrics
 
@@ -97,7 +95,6 @@ export function calculateFrequencyDomainMetrics(rrIntervals: number[]): any {
 
     // Clean up
     fft.dispose();
-
     return {
         totalPower,
         vlf,
@@ -118,4 +115,34 @@ function integratePSD(psd: number[], sampleRate: number, fStart: number, fEnd: n
         sum += psd[i];
     }
     return sum * df;
+}
+
+
+// Initialize variables for the sliding window approach
+let rr_intervals: number[] = [];  // To store RR intervals
+const window_size = 256;  // Must be a power of 2 for FFT
+const slide_size = 64;  // The number of RR intervals to slide the window by
+let stored_metrics: any[] = [];  // To store the metrics over time for later use
+
+// Modified version of calculateFrequencyDomainMetrics to implement the sliding window approach
+export function calculateSlidingWindowMetrics(new_rr_interval: number) {
+    // Add new RR interval to the buffer
+    rr_intervals.push(new_rr_interval);
+    
+    // Check if we have enough data to fill the window
+    if (rr_intervals.length >= window_size) {
+        // Perform frequency-domain analysis on the current window
+        const current_metrics = calculateFrequencyDomainMetrics(rr_intervals.slice(-window_size));
+        
+        // Store the current metrics for later use
+        stored_metrics.push(current_metrics);
+        
+        // Slide the window by removing `slide_size` oldest RR intervals
+        rr_intervals = rr_intervals.slice(slide_size);
+    }
+}
+
+// Function to get the latest metrics
+export function getLatestMetrics() {
+    return stored_metrics.length > 0 ? stored_metrics[stored_metrics.length - 1] : null;
 }

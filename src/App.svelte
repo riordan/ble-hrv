@@ -1,11 +1,6 @@
 <script lang="ts">
-    import {
-        connectToHeartRateDevice,
-        parseHeartRate,
-        getBatteryLevel,
-        getDeviceInfo,
-    } from "./bleHelper.js";
-	
+    import { onMount } from "svelte";
+    import { readable } from "svelte/store";
     import {
         calculateSDNN,
         calculateRMSSD,
@@ -13,113 +8,69 @@
         calculatepNN50,
         calculateAverageHR,
         calculateFrequencyDomainMetrics,
-    } from "./hrvMetrics.js";
+        calculateSlidingWindowMetrics,
+        getLatestMetrics,
+    } from "./hrvMetrics";
 
-    type HeartRateData = {
-        timestamp: number;
-        heartRate: number;
-        contactDetected: boolean;
-        energyExpended?: number;
-        rrIntervals?: number[];
-    };
+    let device: BluetoothDevice;
+    let server: BluetoothRemoteGATTServer;
+    let service: BluetoothRemoteGATTService;
+    let characteristic: BluetoothRemoteGATTCharacteristic;
+    let rrIntervals: number[] = [];
+    let heartRate: number;
 
-    type FrequencyMetrics = {
-        totalPower: number;
-        vlf: number;
-        lf: number;
-        hf: number;
-        lf_hf_ratio: number;
-    };
-
-    type DeviceInfo = {
-        name: string; 
-        id: string;
-    };
-
-    let heartRateResult: HeartRateData | null = null;
-    let batteryLevel: number | null = null;
-    let deviceInfo: DeviceInfo | null = null;
     let sdnn: number | null = null;
     let rmssd: number | null = null;
     let nn50: number | null = null;
     let pnn50: number | null = null;
     let averageHR: number | null = null;
-    let frequencyMetrics: FrequencyMetrics | null = null;
+    let latest_metrics: any = null; // Define the type according to your needs
 
     async function connect() {
-        try {
-            const { characteristic, device } = await connectToHeartRateDevice();
-
-            batteryLevel = await getBatteryLevel(device);
-            
-            // Fix name property to be required string
-            deviceInfo = {
-                name: device.name!,
-                id: device.id
-            };
-
-            characteristic.startNotifications();
-            characteristic.addEventListener(
-                "characteristicvaluechanged",
-                handleHeartRateChange
-            );
-        } catch (error) {
-            console.error(error);
-            // Display the error to the user
-        }
+        device = await navigator.bluetooth.requestDevice({
+            filters: [{ services: ["heart_rate"] }],
+        });
+        server = await device.gatt.connect();
+        service = await server.getPrimaryService("heart_rate");
+        characteristic = await service.getCharacteristic(
+            "heart_rate_measurement"
+        );
+        characteristic.addEventListener(
+            "characteristicvaluechanged",
+            handleHeartRateChange
+        );
+        await characteristic.startNotifications();
     }
 
     function handleHeartRateChange(event: Event) {
-        // Type assertion for the event target
-        const target = event.target as BluetoothRemoteGATTCharacteristic;
-        
-        // Add check for undefined value
-        if (target.value) {
-          heartRateResult = parseHeartRate(target.value);
+        const value = (event.target as BluetoothRemoteGATTCharacteristic).value;
+        const rr_interval = value?.getUint16(1, /*littleEndian=*/ true);
+        rrIntervals.push(rr_interval);
+
+        calculateSlidingWindowMetrics(rr_interval);
+
+        if (latest_metrics) {
+            // Code to update the UI with the latest metrics
         }
 
-        if (
-            heartRateResult?.rrIntervals &&
-            heartRateResult.rrIntervals.length > 1
-        ) {
-            sdnn = calculateSDNN(heartRateResult.rrIntervals);
-            rmssd = calculateRMSSD(heartRateResult.rrIntervals);
-            nn50 = calculateNN50(heartRateResult.rrIntervals);
-            pnn50 = calculatepNN50(heartRateResult.rrIntervals);
-            averageHR = calculateAverageHR(heartRateResult.rrIntervals);
+        sdnn = calculateSDNN(rrIntervals);
+        rmssd = calculateRMSSD(rrIntervals);
+        nn50 = calculateNN50(rrIntervals);
+        pnn50 = calculatepNN50(rrIntervals);
+        averageHR = calculateAverageHR(rrIntervals);
 
-            frequencyMetrics = calculateFrequencyDomainMetrics(
-                heartRateResult.rrIntervals
-            );
-        }
+        latest_metrics = getLatestMetrics();
+
+        // Update the UI
+        // ...
     }
+
+    onMount(() => {
+        connect();
+    });
 </script>
 
-<button on:click={connect}>Connect to Heart Rate Monitor</button>
-
-{#if heartRateResult}
-	<div>
-		<p>Timestamp: {heartRateResult.timestamp}</p>
-		<p>Heart Rate: {heartRateResult.heartRate} bpm</p>
-		<p>Battery Level: {batteryLevel}%</p>
-		{#if deviceInfo}
-			<p>Device Name: {deviceInfo.name}</p>
-		{/if}
-
-		<h3>HRV Metrics (Time Domain)</h3>
-		<p>SDNN: {sdnn}</p>
-		<p>RMSSD: {rmssd}</p>
-		<p>NN50: {nn50}</p>
-		<p>pNN50: {pnn50}%</p>
-		<p>Average HR: {averageHR} bpm</p>
-
-		{#if frequencyMetrics}
-			<h3>HRV Metrics (Frequency Domain)</h3>
-			<p>Total Power: {frequencyMetrics.totalPower}</p>
-			<p>VLF: {frequencyMetrics.vlf}</p>
-			<p>LF: {frequencyMetrics.lf}</p>
-			<p>HF: {frequencyMetrics.hf}</p>
-			<p>LF/HF Ratio: {frequencyMetrics.lf_hf_ratio}</p>
-		{/if}
-	</div>
-{/if}
+<main>
+    <!-- Svelte template code for the UI -->
+    <!-- Existing Svelte template code to display heart rate and other metrics -->
+</main>
