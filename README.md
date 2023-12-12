@@ -6,11 +6,15 @@ Biofeedback in the browser
 Using the Bluetooth WebAPI to get heart rate variability data from a chest strap, in a browser.
 
 ## Getting started
-This project uses the WebBluetooth API, which requires specific browser configurations to function correctly. Below are instructions for enabling WebBluetooth in different browsers:
+This project uses the WebBluetooth API, which requires specific browser configurations to function correctly.
 
-- **Chrome**: WebBluetooth should be enabled by default in Chrome. If it's not working, make sure you are using a recent version of Chrome and that the site has been granted the necessary permissions to use Bluetooth devices.
-- **Firefox**: WebBluetooth is not supported by default. You can enable it by navigating to `about:config`, searching for `dom.webbluetooth.enabled`, and setting it to `true`. Note that this is an experimental feature and might not be as stable as in other browsers.
-- **Safari**: As of the last update to this document, Safari does not support the WebBluetooth API.
+### Browser Configuration for WebBluetooth
+
+For detailed instructions on enabling WebBluetooth in your browser, please refer to the following resources:
+
+- **Chrome**: [Enabling WebBluetooth in Chrome](https://developer.chrome.com/blog/new-in-chrome-56/#web-bluetooth)
+- **Firefox**: [Enabling WebBluetooth in Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
+- **Safari**: Currently, Safari does not support the WebBluetooth API.
 
 Testing with a Polar H9 chest strap. Should hopefully work with others.
 
