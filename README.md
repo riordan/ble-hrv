@@ -6,7 +6,23 @@ Biofeedback in the browser
 Using the Bluetooth WebAPI to get heart rate variability data from a chest strap, in a browser.
 
 ## Getting started
-So much wet paint. Instructions tk. Testing with a Polar H9 chest strap. Should hopefully work with others.
+This project uses the WebBluetooth API, which requires specific browser configurations to function correctly.
+
+### Browser Configuration for WebBluetooth
+
+For detailed instructions on enabling WebBluetooth in your browser, please refer to the following resources:
+
+- **Chrome**: [Enabling WebBluetooth in Chrome](https://developer.chrome.com/blog/new-in-chrome-56/#web-bluetooth)
+- **Firefox**: [Enabling WebBluetooth in Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API)
+- **Safari**: Currently, Safari does not support the WebBluetooth API.
+
+Testing with a Polar H9 chest strap. Should hopefully work with others.
+
+## Frequency Domain Metrics Calculation Approach
+
+To calculate frequency domain metrics, our approach will be to:
+1. Calculate them in real-time via a sliding window.
+2. Introduce the concept of a logged session and be able to fully compute the frequency domain metrics for a whole session or across windows of that session.
 
 ## Prior Art
 This project couldn't have been done without the work of those who came before:

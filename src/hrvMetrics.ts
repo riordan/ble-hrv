@@ -119,3 +119,16 @@ function integratePSD(psd: number[], sampleRate: number, fStart: number, fEnd: n
     }
     return sum * df;
 }
+// Template for calculateSlidingWindowMetrics function
+export function calculateSlidingWindowMetrics(rrIntervals: number[]): any {
+    // TODO: Implement the logic for sliding window metrics calculation
+    // Placeholder return
+    return {};
+}
+
+// Template for getLatestMetrics function
+export function getLatestMetrics(rrIntervals: number[]): any {
+    // TODO: Implement the logic for getting the latest metrics
+    // Placeholder return
+    return {};
+}
