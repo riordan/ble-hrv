@@ -97,11 +97,21 @@
 
     function endSession() {
         sessionActive = false;
-        // Here you would calculate the metrics for the whole session
-        // calculateTimeDomainMetrics(sessionData);
         if (sessionData.length > 0 && sessionData[0].rrIntervals) {
             const rrIntervals = sessionData.flatMap(data => data.rrIntervals || []);
+            sdnn = calculateSDNN(rrIntervals);
+            rmssd = calculateRMSSD(rrIntervals);
+            nn50 = calculateNN50(rrIntervals);
+            pnn50 = calculatepNN50(rrIntervals);
+            averageHR = calculateAverageHR(rrIntervals);
             frequencyMetrics = calculateFrequencyDomainMetrics(rrIntervals);
+        } else {
+            sdnn = null;
+            rmssd = null;
+            nn50 = null;
+            pnn50 = null;
+            averageHR = null;
+            frequencyMetrics = null;
         }
     }
 
