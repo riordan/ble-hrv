@@ -5,7 +5,7 @@ import {
     calculateNN50,
     calculatepNN50,
     calculateAverageHR,
-    zeroPadArray
+    zeroPadArray // This function will be implemented later
 } from './hrvMetrics';
 
 // Test data
@@ -24,6 +24,35 @@ describe('calculateSDNN', () => {
         const expectedSDNN = 120.32;
         const sdnn = calculateSDNN(longRRIntervals);
         expect(sdnn).toBeCloseTo(expectedSDNN, 2);
+    });
+});
+
+describe('zeroPadArray', () => {
+    it('should return the same array if the length is already a power of two', () => {
+        const inputArray = [1, 2, 3, 4]; // Length is 4, which is a power of two
+        const result = zeroPadArray(inputArray);
+        expect(result).toEqual(inputArray);
+    });
+
+    it('should zero pad the array to the next power of two', () => {
+        const inputArray = [1, 2, 3]; // Length is 3, not a power of two
+        const expectedOutput = [1, 2, 3, 0]; // Zero padded to length 4
+        const result = zeroPadArray(inputArray);
+        expect(result).toEqual(expectedOutput);
+    });
+
+    it('should handle an empty array', () => {
+        const inputArray = [];
+        const expectedOutput = [];
+        const result = zeroPadArray(inputArray);
+        expect(result).toEqual(expectedOutput);
+    });
+
+    it('should handle a very large array', () => {
+        const inputArray = new Array(1023).fill(1); // Length is 1023, not a power of two
+        const expectedOutput = [...inputArray, ...new Array(1).fill(0)]; // Zero padded to length 1024
+        const result = zeroPadArray(inputArray);
+        expect(result).toEqual(expectedOutput);
     });
 });
 
