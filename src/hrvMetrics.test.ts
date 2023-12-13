@@ -4,7 +4,8 @@ import {
     calculateRMSSD,
     calculateNN50,
     calculatepNN50,
-    calculateAverageHR
+    calculateAverageHR,
+    zeroPadArray
 } from './hrvMetrics';
 
 // Test data
