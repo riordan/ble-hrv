@@ -59,12 +59,17 @@ export function calculateFrequencyDomainMetrics(rrIntervals: number[]): any {
     // Log the size of rrIntervals for diagnostics.
     console.log(`Processing rrIntervals of size: ${n}`);
 
-    // Ensure that the size is a power of 2 and within the allowed range.
-    if (!isPowerOfTwo(n)) {
-        console.error(`Invalid size: ${n}. Size is not a power of 2.`);
-    }
+    // Ensure that the size is within the allowed range.
     if (n < 4 || n > 131072) {
         console.error(`Invalid size: ${n}. Size is out of the allowed range (4 to 131072).`);
+        return;
+    }
+
+    // Apply zero padding if the size is not a power of 2.
+    let paddedSize = n;
+    if (!isPowerOfTwo(n)) {
+        paddedSize = Math.pow(2, Math.ceil(Math.log2(n)));
+        console.log(`Applying zero padding. New size: ${paddedSize}`);
     }
 
     const sampleRate = 1 / (rrIntervals.reduce((a, b) => a + b, 0) / n / 1000);  // in Hz
