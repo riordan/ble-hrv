@@ -47,7 +47,17 @@ export function calculateAverageHR(rrIntervals: number[]) {
     return (60000 / (totalTime / rrIntervals.length));
 }
 function isPowerOfTwo(n: number): boolean {
-    return !!n && (n & (n - 1)) === 0;
+    return n !== 0 && (n & (n - 1)) === 0;
+}
+
+export function zeroPadArray(array: number[]): number[] {
+    const length = array.length;
+    if (isPowerOfTwo(length)) {
+        return array;
+    }
+
+    const nextPowerOfTwo = Math.pow(2, Math.ceil(Math.log2(length)));
+    return [...array, ...new Array(nextPowerOfTwo - length).fill(0)];
 }
 
 
