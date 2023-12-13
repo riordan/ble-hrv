@@ -99,7 +99,10 @@
         sessionActive = false;
         // Here you would calculate the metrics for the whole session
         // calculateTimeDomainMetrics(sessionData);
-        // calculateFrequencyDomainMetrics(sessionData); // Once implemented
+        if (sessionData.length > 0 && sessionData[0].rrIntervals) {
+            const rrIntervals = sessionData.flatMap(data => data.rrIntervals || []);
+            frequencyMetrics = calculateFrequencyDomainMetrics(rrIntervals);
+        }
     }
 
     function handleHeartRateChange(event: Event) {
