@@ -28,6 +28,7 @@
     "svelte": "^3.55.0",
     "svelte-check": "^3.5.2",
     "svelte-preprocess": "^5.0.4",
+    "svelte2tsx": "^0.6.27",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.2",
     "vitest": "^1.0.4"
