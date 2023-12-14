@@ -107,6 +107,7 @@
 	<div>
 		<p>Timestamp: {heartRateResult.timestamp}</p>
 		<p>Heart Rate: {heartRateResult.heartRate} bpm</p>
+		<p>Contact Detected: {heartRateResult.contactDetected ? 'Yes' : 'No'}</p> <!-- Added line for contact detection -->
 		<p>Battery Level: {batteryLevel}%</p>
 		{#if deviceInfo}
 			<p>Device Name: {deviceInfo.name}</p>
