@@ -33,6 +33,12 @@ function serve() {
 }
 
 export default {
+	onwarn(warning, warn) {
+		// Skip certain warnings
+		if (warning.code === 'EVAL' && /NayukiCFFT\.js/.test(warning.id)) return;
+		// Use default for everything else
+		warn(warning);
+	},
 	input: 'src/main.ts',
 	output: {
 		sourcemap: true,
