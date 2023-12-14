@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
+    "outDir": "./build",
     "lib": ["dom", "es2015"],
     "types": ["svelte", "svelte2tsx/svelte-shims", "web-bluetooth"]
   },

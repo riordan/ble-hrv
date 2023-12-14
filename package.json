@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "build": "tsc && rollup -c",
+    "build": "rimraf ./build && tsc && rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear --single",
     "validate": "svelte-check"
