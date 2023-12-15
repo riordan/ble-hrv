@@ -15,13 +15,15 @@ export async function connectToHeartRateDevice() {
             const characteristic = await service.getCharacteristic('heart_rate_measurement');
 
             return { characteristic, device };
-        throw new Error("Device GATT is undefined");
-
-    } catch (error) {
+        } else {
+            throw new Error("Device GATT is undefined");
+        }
+    } catch (error: unknown) {
         console.error("Bluetooth Error:", error);
-        throw new Error(`Failed to connect to device: ${error.message}`);
+        throw new Error(`Failed to connect to device: ${(error as Error).message}`);
     }
 }
+// Ensure all export statements are at the top level
 export function parseHeartRate(value: DataView) {
     // This logic is based on the Bluetooth SIG Heart Rate Profile specification
 
@@ -59,6 +61,7 @@ export function parseHeartRate(value: DataView) {
         rrIntervals: rrIntervals.length > 0 ? rrIntervals : undefined
     };
 }
+// Ensure all export statements are at the top level
 export async function getBatteryLevel(device: BluetoothDevice) {
     if (!device.gatt) {
         throw new Error("'device.gatt' is undefined");
@@ -71,12 +74,13 @@ export async function getBatteryLevel(device: BluetoothDevice) {
         const batteryLevel = await batteryLevelChar.readValue();
 
         return batteryLevel.getUint8(0);  // returns battery percentage
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Battery Level Error:", error);
         return null;
     }
 }
 
+// Ensure all export statements are at the top level
 export function stopHeartRateNotifications(characteristic: BluetoothRemoteGATTCharacteristic, callback: (event: Event) => void) {
     try {
         characteristic.stopNotifications();
@@ -87,6 +91,7 @@ export function stopHeartRateNotifications(characteristic: BluetoothRemoteGATTCh
 }
 
 
+// Ensure all export statements are at the top level
 export function getDeviceInfo(device: BluetoothDevice) {
     return {
         name: device.name,
