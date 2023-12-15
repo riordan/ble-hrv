@@ -15,9 +15,8 @@ export async function connectToHeartRateDevice() {
             const characteristic = await service.getCharacteristic('heart_rate_measurement');
 
             return { characteristic, device };
-        } else {
-            throw new Error("Device GATT is undefined");
         }
+        throw new Error("Device GATT is undefined");
     } catch (error: unknown) {
         console.error("Bluetooth Error:", error);
         throw new Error(`Failed to connect to device: ${(error as Error).message}`);
