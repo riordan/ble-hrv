@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "build": "tsc && rollup -c",
+    "build": "rimraf ./build && tsc && rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear --single",
-    "validate": "svelte-check"
+    "validate": "svelte-check",
+    "lint": "npx @biomejs/biome lint ./src",
+    "lint-fix": "npx @biomejs/biome lint ./src --apply"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.4.1",
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-terser": "^0.4.0",
@@ -21,6 +24,7 @@
     "@types/node": "^20.8.3",
     "@types/web-bluetooth": "^0.0.18",
     "jsdom": "^23.0.1",
+    "rimraf": "^5.0.5",
     "rollup": "^3.15.0",
     "rollup-plugin-css-only": "^4.3.0",
     "rollup-plugin-livereload": "^2.0.0",

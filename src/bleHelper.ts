@@ -35,7 +35,7 @@ export function parseHeartRate(value: DataView) {
     const rrIntervalPresent = (flags & 0x10) === 0x10;
 
     let currentOffset = 1;
-    let heartRate = heartRate16BitFormat ? value.getUint16(currentOffset, true) : value.getUint8(currentOffset);
+    const heartRate = heartRate16BitFormat ? value.getUint16(currentOffset, true) : value.getUint8(currentOffset);
 
     currentOffset += heartRate16BitFormat ? 2 : 1;
 
@@ -45,7 +45,7 @@ export function parseHeartRate(value: DataView) {
         currentOffset += 2;
     }
 
-    let rrIntervals = [];
+    const rrIntervals = [];
     if (rrIntervalPresent) {
         while (currentOffset + 1 <= value.byteLength) {
             rrIntervals.push(value.getUint16(currentOffset, true));
