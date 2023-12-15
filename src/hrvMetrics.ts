@@ -12,7 +12,7 @@ const HF_BAND = [0.15, 0.4];
 // SDNN: Standard Deviation of NN intervals
 export function calculateSDNN(rrIntervals: number[]) {
     const mean = rrIntervals.reduce((acc, val) => acc + val, 0) / rrIntervals.length;
-    const squaredDiffs = rrIntervals.map(val => Math.pow(val - mean, 2));
+    const squaredDiffs = rrIntervals.map(val => (val - mean) ** 2);
     const variance = squaredDiffs.reduce((acc, val) => acc + val, 0) / rrIntervals.length;
     return Math.sqrt(variance);
 }
@@ -53,7 +53,7 @@ function isPowerOfTwo(n: number): boolean {
 
 //Calculate Frequency Domain metrics
 
-export function calculateFrequencyDomainMetrics(rrIntervals: number[]): any {
+export function calculateFrequencyDomainMetrics(rrIntervals: number[]) {
     const n = rrIntervals.length;
     
     // Log the size of rrIntervals for diagnostics.
@@ -120,14 +120,14 @@ function integratePSD(psd: number[], sampleRate: number, fStart: number, fEnd: n
     return sum * df;
 }
 // Template for calculateSlidingWindowMetrics function
-export function calculateSlidingWindowMetrics(rrIntervals: number[]): any {
+export function calculateSlidingWindowMetrics(rrIntervals: number[]) {
     // TODO: Implement the logic for sliding window metrics calculation
     // Placeholder return
     return {};
 }
 
 // Template for getLatestMetrics function
-export function getLatestMetrics(rrIntervals: number[]): any {
+export function getLatestMetrics(rrIntervals: number[]) {
     // TODO: Implement the logic for getting the latest metrics
     // Placeholder return
     return {};
