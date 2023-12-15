@@ -8,9 +8,12 @@
     "build": "rimraf ./build && tsc && rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear --single",
-    "validate": "svelte-check"
+    "validate": "svelte-check",
+    "lint": "npx @biomejs/biome lint ./src",
+    "lint-fix": "npx @biomejs/biome lint ./src --apply"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.4.1",
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-terser": "^0.4.0",
