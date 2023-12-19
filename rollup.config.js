@@ -4,6 +4,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
+import nodePolyfills from 'rollup-plugin-node-polyfills';
 import livereload from 'rollup-plugin-livereload';
 import css from 'rollup-plugin-css-only';
 import typescript from '@rollup/plugin-typescript';
@@ -61,6 +62,7 @@ export default {
 		// some cases you'll need additional configuration -
 		// consult the documentation for details:
 		// https://github.com/rollup/plugins/tree/master/packages/commonjs
+		nodePolyfills(),
 		resolve({
 			browser: true,
 			dedupe: ['svelte'],
