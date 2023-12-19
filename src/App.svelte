@@ -1,4 +1,5 @@
 <script lang="ts">
+  import sveltePreprocess from 'svelte-preprocess';
     import {
         connectToHeartRateDevice,
         parseHeartRate,
