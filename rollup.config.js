@@ -35,6 +35,7 @@ function serve() {
 }
 
 export default {
+	external: ['pug', 'coffeescript', 'stylus', 'sugarss'],
 	onwarn(warning, warn) {
 		// Skip certain warnings
 		if (warning.code === 'EVAL' && /NayukiCFFT\.js/.test(warning.id)) return;
